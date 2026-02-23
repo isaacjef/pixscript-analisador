@@ -61,29 +61,43 @@ public final class Analisador {
         return null;
     }
 
+    // private String verificarTokenVariavel(Map<String, String[]> tabela, String linha) {
+    //     for (Map.Entry<String, String[]> e : tabela.entrySet()) {
+    //         String[] valores = e.getValue();
+    //         if (valores != null) {
+    //             for (String v : valores) {
+    //                 if (v != null && v.equals(lexema)) {
+    //                     return e.getKey();
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return null;
+    // }
+
     public void ler_pix() throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader("teste.pix"))) {
             String linha;
 
             Map<String, String[]> tabela_token = validar_tokens();
 
-            Pattern prioridadeA = Pattern.compile("([A-Z]+)"); // Exemplo de regex para tokens de prioridade A
+            Pattern prioridadeA = Pattern.compile("([a-zA-Z0-9$>'\"=<:|!&{}]+)"); // Exemplo de regex para tokens de prioridade A
             // Alternativa para não ter que percorrer o Map de tokens toda vez
-
+            List<String> tokens = new ArrayList<>();
             while ((linha = reader.readLine()) != null) {
-                List<String> tokens = new ArrayList<>();
                 Matcher matcher = prioridadeA.matcher(linha);
 
                 while (matcher.find()) {
                     String lex = matcher.group();
                     String tipo = verificarToken(tabela_token, lex); // verifica se existe & retorna tipo (key) do token
-                    System.out.println("Encontrado: " + lex + " => " + (tipo != null ? tipo : "UNKNOWN"));
+                    System.out.println("Encontrado: " + lex + " => " + (tipo != null ? tipo : "UNKWN"));
                     if (tipo != null) {
-                        tokens.add(tipo + ":" + lex);
+                        tokens.add("<" + tipo + ", " + lex + ">");
                     } else {
-                        tokens.add("UNKNOWN:" + lex);
+                        Pattern special_param = Pattern.compile("("+ tabela_token.get("VAR") +")"); // Exemplo de regex para tokens de prioridade A
                     }
                 }
+
 
                 if (!tokens.isEmpty()) {
                     System.out.println("Tokens linha: " + tokens);
