@@ -49,8 +49,17 @@ CLOSE
 
 # 📦 Etapas do Programa
 
-1º - Criar a lista de tokens válidos.
-2º - Ler todos os símbolos do código de entrada.
+1º [X] - Criar a lista de tokens válidos.
+
+![Print da token_table.txt](image.png)
+
+Tabela de lista de tokens válidos. (Por enquanto) O token do tipo ID (IDENTIFIER), deve ficar na última posição,
+para que outros tipos não sejam detectados pelo mesmo, ocorrendo incongruencias entre os tipos.
+**(Criar tipo NUL: NULO, e TEX: '[...]')
+
+2º [] - Ler todos os símbolos do código de entrada.
+
+
 3º - Reunir todos lexemas, menos espaçamentos.
 4º - Tokenizar.
 5º - Criar a tabela de símbolos.

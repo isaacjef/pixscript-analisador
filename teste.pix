@@ -1,12 +1,14 @@
 LEDGER transferencia
- LET @nome = 'Denecley Alvim'
- LET @produto = 'Placa Nvidia 5070RTX'
- LET $valor = 4999.99
- LET !pix = "soinformatica@gmail.com"
- IF (!pix != "") {
- $> 'Realizar transferência'
- }
- :: {
- $> 'Aguardando chave PIX'
- }
+    LET @nome <- 'Denecley Alvim' LET @produto <- 'Placa Nvidia 5070RTX'
+    LET $valor <- 4999.99
+    LET !pix <- "soinformatica@gmail.com"
+    LET #count <- 30
+    LET ?transferir <- TRUE
+    LET !pixID <- "rodrigo.gomide@ifgoiano.edu.br"
+    IF (!pix != "") {
+        $> 'Realizar transferência'
+    }
+    :: {
+        $> 'Aguardando chave PIX'
+    }
 CLOSE
