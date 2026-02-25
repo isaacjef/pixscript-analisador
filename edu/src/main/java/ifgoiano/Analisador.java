@@ -5,53 +5,23 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public final class Analisador {
 
-    String caminho;
+    Token t = new Token(null, null);
     //Map<String, String[]> tabela_simbolos;
-    Map<String, ArrayList<String>> tabela_tokens;
+    //Map<String, ArrayList<String>> tabela_tokens;
 
     public Analisador() {
-        this.caminho = "edu/src/main/resources/";
-        this.tabela_tokens = validar_tokens(); // Preencher a tabela com o método validar_tokens()
-    }
-    
-    public HashMap<String, ArrayList<String>> validar_tokens() {
-        //String caminho = "edu/src/main/resources/token_table.txt";
-        //System.getProperties().forEach((key, value) -> System.out.println(key + ": " + value));
-        //System.out.println(System.getProperty("user.dir"));
-        this.tabela_tokens = new HashMap<>();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(this.caminho + "token_table.txt"))) {
-            String linha;
-            while ((linha = reader.readLine()) != null) {
-                // Removendo colchetes desnecessários e dividindo a linha em tipo e lexemas
-                linha = linha.replace("[", "");
-                linha = linha.substring(0, linha.lastIndexOf("]"));
-
-                String[] tipo = linha.split(": ");
-                //String[] lexemas = tipo[1].split(", ");
-                ArrayList<String> lexemas = new ArrayList<>();
-                for (String lex : tipo[1].split(", ")) {
-                    lexemas.add(lex.trim());
-                }
-
-                tabela_tokens.put(tipo[0], lexemas);
-            }
-
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace(); // Trata erros de leitura
-        }
-
-        return new HashMap<>(tabela_tokens);
+        //this.caminho = "edu/src/main/resources/";
+        //this.tabela_tokens = validar_tokens(); // Preencher a tabela com o método validar_tokens()
+        t.validar_tokens();
     }
 
     private String verificarToken(Map<String, ArrayList<String>> tabela_tokens, String lexema) {
@@ -72,31 +42,27 @@ public final class Analisador {
     // Verificar validade de token não-fixo (Ex: VAR = $[a-zA-Z0-9]+)
     // token não-fixo = token regex
     private String verificarTokenVariavel(Map<String, ArrayList<String>> tabela_tokens, String linha) {
-        List<String> keys = Arrays.asList("VAR", "NUMI", "NUMD", "CPIX", "ID");
-        // Map<String, ArrayList<String>> sub_map = tabela_tokens.entrySet().stream()
-        //     .filter(entry -> keys.contains(entry.getKey()))
-        //     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        List<String> keys = Arrays.asList("VAR", "NUMI", "NUMD", "CPIX");
 
-        Map<String, ArrayList<String>> sub_map = keys.stream()
-            .filter(tabela_tokens::containsKey)
-            .collect(HashMap::new, (m, k) -> m.put(k, tabela_tokens.get(k)), HashMap::putAll);
+        // Map each individual element of the ArrayList to its token type
+        Map<String,String> sub_map = tabela_tokens.entrySet().stream()
+            .filter(entry -> keys.contains(entry.getKey()))
+            .flatMap(entry -> entry.getValue().stream()
+                .map(v -> new java.util.AbstractMap.SimpleEntry<>(v, entry.getKey())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        sub_map.forEach((k, v) -> {
-            Pattern pattern = Pattern.compile("(" + k + ")"); // Exemplo de regex para tokens de variável
+        //System.out.println("Sub-mapa para tokens variáveis: " + sub_map); // Debug: Verificar o conteúdo do sub-mapa
+
+        for (Map.Entry<String,String> e : sub_map.entrySet()) {
+            Pattern pattern = Pattern.compile("(" + e.getKey() + ")");
             Matcher matcher = pattern.matcher(linha);
-            if (matcher.matches()) {
-                return linha;
+
+            if (matcher.find()) {
+                //System.out.println(matcher.group() + "-------------- Token variável encontrado: " + e.getValue()); // Debug: Verificar se o token variável foi encontrado
+                return e.getValue();
             }
-        });
-        // filterKeys.forEach(v -> {
-        //     Pattern pattern = Pattern.compile("(" + v + ")"); // Exemplo de regex para tokens de variável
-        //     Matcher matcher = pattern.matcher(linha);
-        //     if (matcher.matches()) {
-        //          System.out.println("--------------------------------: " + linha);
-        //          return linha;
-        //     }
-        // });
-        
+        }
+
         return null;
     }
 
@@ -104,38 +70,71 @@ public final class Analisador {
         try (BufferedReader reader = new BufferedReader(new FileReader("teste.pix"))) {
             String linha;
 
-            Map<String, ArrayList<String>> tabela_token = validar_tokens();
-            LinkedHashMap<Integer, Token> tokens = new LinkedHashMap<>();
+            Map<String, ArrayList<String>> tabela_token = t.validar_tokens();
+            LinkedHashMap<String, Token> tokens = new LinkedHashMap<>();
             Integer id = 0;
         
-            Pattern prioridadeA = Pattern.compile("([a-zA-Z0-9$\\+\\-*\\/%()=<>'\"&@#?|!:{}.]+)"); // Exemplo de regex para tokens de prioridade A
+            Pattern prioridadeA = Pattern.compile("([A-Z<\\-$<>(){}=!:\"]+)"); // Exemplo de regex para tokens de prioridade A
+            Pattern prioridadeB = Pattern.compile("([\\w _$!#?@áãêõ.]+)");
 
+            //A tratar -> ("") NIL, ("), ('), ('TEXTO'), ("PIX")
             while ((linha = reader.readLine()) != null) {
-                Matcher matcher = prioridadeA.matcher(linha);
+                // Iteratively match tokens on the current line until no more matches
+                while (linha != null && !linha.isEmpty()) {
+                    // Try prioridadeA first
+                    Matcher matcherA = prioridadeA.matcher(linha);
+                    if (matcherA.find()) {
+                        String lex = matcherA.group();
+                        String tipo_token = verificarToken(tabela_token, lex); // verifica se existe & retorna tipo (key) do token
 
-                while (matcher.find()) {
-                    String lex = matcher.group();
-                    String tipo_token = verificarToken(tabela_token, lex); // verifica se existe & retorna tipo (key) do token
+                        if (tipo_token != null) {
+                            System.out.println("AAA ->  " + lex);
 
-                    if (tipo_token == null && !lex.trim().isEmpty()) { // Se o token não for encontrado na tabela, verificar se é um token de variável
-                        System.out.println("Resto -> " + lex);
-                        String tipo_token_var = verificarTokenVariavel(tabela_token, lex); // verifica se é um token de variável
-                    } else {
-                        System.out.println(id + " - Token encontrado: " + lex + " -> Tipo: " + tipo_token); // Debug: Verificar se o token foi encontrado e seu tipo
-                        tokens.put(id, new Token(id, lex, tipo_token));
-                        id++;
+                            // Evita sobrescrever tokens já existentes
+                            Token t = tokens.putIfAbsent(lex, new Token(id, lex.trim(), tipo_token));
+                            if (t == null) {
+                                id++;
+                            }
+
+                            linha = linha.replaceFirst(Pattern.quote(lex), ""); // Remove the matched lexeme and continue
+                            continue;
+                        }
+                        // if prioridadeA matched but not a fixed token, fall through to prioridadeB
                     }
 
-                    // 2º Alternativa para armazenar os tokens com os seus tipos e id: HashSet
-                    //String lex2 = linha.substring(lex.length()); // Pega o que vem depois do token encontrado
+                    // Try prioridadeB (identifiers/variables)
+                    // Matcher matcherB = prioridadeB.matcher(linha);
+                    // if (matcherB.find()) {
+                    //     String lex = matcherB.group();
+                    //     String tipo_token_var = verificarTokenVariavel(tabela_token, lex); // verifica se é um token variável
+
+                    //     //System.out.println("BBB ->  " + lex);
+                    //     if (tipo_token_var != null) {
+                    //         lex = lex.trim(); // Não é do tipo texto
+                    //         tokens.put(lex, new Token(id, lex, tipo_token_var));
+                    //         id++;
+                    //         linha = linha.replaceFirst(Pattern.quote(lex), "");
+                    //         continue;
+                    //     } else if (!lex.trim().isEmpty()) { // Evita adicionar tokens vazios ou apenas com espaços
+                    //         tokens.put(lex, new Token(id, lex, "ID"));
+                    //         id++;
+                    //         linha = linha.replaceFirst(Pattern.quote(lex), "");
+                    //         continue;
+                    //     } else {
+                    //         // Remove os espaços em branco, para evitar loops
+                    //         linha = linha.replaceFirst(Pattern.quote(lex), "");
+                    //         continue;
+                    //     }
+                    // }
+
+                    // // No matcher found any more lexemes on this line
+                    break;
                 }
-
-
-                // if (!tokens.isEmpty()) {
-                //     System.out.println("Tokens linha: " + tokens);
-                // }
             }
-
+            
+            //System.out.println("Tipo - Lexema - ID" + tokens);
+            tokens.forEach((key, value) -> System.out.println(value.getTipo() + " - " + key + " - " + value.getId()));
+        
             reader.close();
         } catch (IOException e) {
             e.printStackTrace(); // Trata erros de leitura
