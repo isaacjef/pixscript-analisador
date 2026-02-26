@@ -20,11 +20,7 @@ public final class Analisador {
     List<Token> tokens = new ArrayList<>();
 
     public Analisador() {
-        //this.caminho = "edu/src/main/resources/";
-        //this.tabela_tokens = validar_tokens(); // Preencher a tabela com o método validar_tokens()
         t.validar_tokens();
-
-        //verificarTokenVariavel(t.validar_tokens(), "2.7)");
     }
 
      // Verifica se o token é válido & retorna o tipo (key) do token
@@ -47,7 +43,7 @@ public final class Analisador {
     private String verificarTokenVariavel(Map<String, ArrayList<String>> tabela_tokens, String lexema) {
         List<String> keys = Arrays.asList("VAR", "NUMI", "NUMD", "NUL", "BOL");
 
-        // Map each individual element of the ArrayList to its token type
+        // "Mapeia" cada elemento do ArrayList para a sua respectiva chave (key)
         Map<String,String> sub_map = tabela_tokens.entrySet().stream()
             .filter(entry -> keys.contains(entry.getKey()))
             .flatMap(entry -> entry.getValue().stream()
@@ -88,16 +84,14 @@ public final class Analisador {
             Map<String, ArrayList<String>> tabela_token = t.validar_tokens();
             Integer id = 0;
         
-            // desconsiderando |\"\" ("")
             Pattern prioridadeA = Pattern.compile("LEDGER|LET|IF|\\{|\\}|::|\\$>|<-|CLOSE|\\+\\+|\\-\\-|!=|==|\\*\\*|\\/\\/|%%|\\(|\\)|&&|\\|\\||!!|>>|<<|>=|<="); // Exemplo de regex para tokens de prioridade A
             //Pattern prioridadeB = Pattern.compile("([\\w_$!#?@áãêõ.]+)");
             Pattern prioridadeB = Pattern.compile("(\\w+\\.\\w+)|([\\S])+");
 
-            //A tratar -> ("") NIL, ("), ('), ("PIX")
             while ((linha = reader.readLine()) != null) {
                 // Análise quais palavras batem (match) com a exp. regular até que não reste mais caracteres.
                 while (linha != null && !linha.isEmpty()) {
-                    // Tenta prioridadeA primeiro
+
                     Matcher matcherA = prioridadeA.matcher(linha);
                     if (matcherA.find()) {
                         String lex = matcherA.group();
@@ -110,7 +104,7 @@ public final class Analisador {
                             }
                             this.tokens.add(new Token(lex.trim(), tipo_token));
 
-                            // Remove the matched lexeme and continue
+                            // Remove a parte encontrada (matched)
                             linha = linha.replaceFirst(Pattern.quote(lex), ""); 
 
                             // Verificar mais casos onde isso ocorre. Ex: BOL -> TRUE, FALSE.
@@ -137,7 +131,6 @@ public final class Analisador {
                                 continue;
                             }
                         }
-                        // if prioridadeA matched but not a fixed token, fall through to prioridadeB
                     }
 
                     // Para armazenar tokens do tipo TEXTO
@@ -179,13 +172,13 @@ public final class Analisador {
                             continue;
                     }
 
-                    // REGEX com prioridadeB (IDENTIFIERS/VAR)
+
                     Matcher matcherB = prioridadeB.matcher(linha);
                     if (matcherB.find()) {
                         String lex = matcherB.group();
-                        String tipo_token_var = verificarTokenVariavel(tabela_token, lex); // verifica se é um token variável
+                        // Verifica se o token é válido
+                        String tipo_token_var = verificarTokenVariavel(tabela_token, lex);
 
-                        //System.out.println("BBB ->  " + tipo_token_var);
                         if (tipo_token_var != null) {
                             lex = lex.trim(); // Não é do tipo texto
                             if (this.tabela_simbolos.putIfAbsent(lex, new Token(id, lex, tipo_token_var)) == null) {
@@ -210,17 +203,14 @@ public final class Analisador {
                         }
                     }
 
-                    // Sem matches
+                    // Linha = ""
                     break;
                 }
             }
-            
-            //tabela_simbolos.forEach((key, value) -> System.out.println(value.getTipo() + " - " + key + " - " + value.getId()));
-            //tokens.forEach(token -> System.out.println("<"+ token.getTipo() + ", " + token.getId() + ">"));
 
             reader.close();
         } catch (IOException e) {
-            e.printStackTrace(); // Trata erros de leitura
+            e.printStackTrace();
         }
     }
 
@@ -256,7 +246,7 @@ public final class Analisador {
             });
             System.out.println("Arquivo .pixobj escrito com sucesso.");
         } catch (IOException e) {
-            e.printStackTrace(); // Trata erros de escrita
+            e.printStackTrace();
         }
     }
 }
