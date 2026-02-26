@@ -15,12 +15,13 @@ public class Main {
             try {
                 System.out.print("Informe o nome ou diretório do arquivo .pix: ");
                 String nome = scanner.nextLine().trim();
+
                 if (!nome.toLowerCase().endsWith(".pix")) {
                     System.out.println("Arquivo, nome ou diretório inválido. Tente novamente.");
                 } else {
                     l.ler_pix(nome);
                     l.tabela_simbolos_csv();
-                    l.pixobj();
+                    l.tokens_pixobj();
                 }
             } catch (Exception e) {
                 logException(e);
@@ -31,10 +32,12 @@ public class Main {
 
     private static void logException(Exception e) {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String when = LocalDateTime.now().format(fmt);
+        String data = LocalDateTime.now().format(fmt);
+
         try (FileWriter fw = new FileWriter("error.log", true);
-             PrintWriter pw = new PrintWriter(fw)) {
-            pw.println("[" + when + "] " + e.toString());
+            PrintWriter pw = new PrintWriter(fw)) {
+            pw.println("[" + data + "] " + e.toString());
+            
             for (StackTraceElement el : e.getStackTrace()) {
                 pw.println("    at " + el.toString());
             }

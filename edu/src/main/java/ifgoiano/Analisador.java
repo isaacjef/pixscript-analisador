@@ -23,8 +23,11 @@ public final class Analisador {
         //this.caminho = "edu/src/main/resources/";
         //this.tabela_tokens = validar_tokens(); // Preencher a tabela com o método validar_tokens()
         t.validar_tokens();
+
+        //verificarTokenVariavel(t.validar_tokens(), "2.7)");
     }
 
+     // Verifica se o token é válido & retorna o tipo (key) do token
     private String verificarToken(Map<String, ArrayList<String>> tabela_tokens, String lexema) {
         for (Map.Entry<String, ArrayList<String>> e : tabela_tokens.entrySet()) {
             ArrayList<String> valores = e.getValue();
@@ -41,8 +44,8 @@ public final class Analisador {
 
     // Verificar validade de token não-fixo (Ex: VAR = $[a-zA-Z0-9]+)
     // token não-fixo = token regex
-    private String verificarTokenVariavel(Map<String, ArrayList<String>> tabela_tokens, String linha) {
-        List<String> keys = Arrays.asList("VAR", "NUMI", "NUMD", "CPIX", "BOL");
+    private String verificarTokenVariavel(Map<String, ArrayList<String>> tabela_tokens, String lexema) {
+        List<String> keys = Arrays.asList("VAR", "NUMI", "NUMD", "NUL", "BOL");
 
         // Map each individual element of the ArrayList to its token type
         Map<String,String> sub_map = tabela_tokens.entrySet().stream()
@@ -54,7 +57,7 @@ public final class Analisador {
         for (Map.Entry<String,String> e : sub_map.entrySet()) {
             String key = "(" + e.getKey() + ")";
             Pattern p = Pattern.compile(key);
-            Matcher m = p.matcher(linha.trim());
+            Matcher m = p.matcher(lexema.trim());
 
             if (m.find()) {
                 return e.getValue();
@@ -64,6 +67,20 @@ public final class Analisador {
         return null;
     }
 
+    /**
+     * Esta classe realiza a leitura de arquivos do tipo .pix, oriundos da linguagem de programação
+     * PixScript. É a principal classe do Analisador Léxico, e, de fato, é um analisador léxico
+     * propriamente dito.
+     * 
+     * As palavras-chaves, tipos e nomes de variáveis, operadores, e etc são capturados via REGEX.
+     * Optamos por utilizar duas expressão regulares gerais, que distinguim os tokens encontrados
+     * em duas prioridades: 
+     * A- Captura somente tokens fixos, que não tem os seus "nomes" modificados;
+     * B- Captura tokens variáveis, os quais os nomes não são fixos, mas sim do tipo REGEX.
+     * 
+     * @param filename
+     * @throws IOException
+     */
     public void ler_pix(String filename) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String linha;
@@ -72,8 +89,9 @@ public final class Analisador {
             Integer id = 0;
         
             // desconsiderando |\"\" ("")
-            Pattern prioridadeA = Pattern.compile("LEDGER|LET|IF|\\{|\\}|::|\\$>|<-|\"|CLOSE|\\+\\+|\\-\\-|!=|==|\\*\\*|\\/\\/|%%|\\(|\\)|&&|\\|\\||!!|>>|<<|>=|<="); // Exemplo de regex para tokens de prioridade A
-            Pattern prioridadeB = Pattern.compile("([\\w_$!#?@áãêõ.]+)");
+            Pattern prioridadeA = Pattern.compile("LEDGER|LET|IF|\\{|\\}|::|\\$>|<-|CLOSE|\\+\\+|\\-\\-|!=|==|\\*\\*|\\/\\/|%%|\\(|\\)|&&|\\|\\||!!|>>|<<|>=|<="); // Exemplo de regex para tokens de prioridade A
+            //Pattern prioridadeB = Pattern.compile("([\\w_$!#?@áãêõ.]+)");
+            Pattern prioridadeB = Pattern.compile("(\\w+\\.\\w+)|([\\S])+");
 
             //A tratar -> ("") NIL, ("), ('), ("PIX")
             while ((linha = reader.readLine()) != null) {
@@ -84,45 +102,78 @@ public final class Analisador {
                     if (matcherA.find()) {
                         String lex = matcherA.group();
                         String tipo_token = verificarToken(tabela_token, lex); 
-                        // verifica se existe & retorna tipo (key) do token
 
                         if (tipo_token != null) {
                             // Evita sobrescrever tokens já existentes
                             if (this.tabela_simbolos.putIfAbsent(lex, new Token(id, lex.trim(), tipo_token)) == null) {
-                                this.tokens.add(new Token(lex.trim(), tipo_token));
                                 id++;
                             }
+                            this.tokens.add(new Token(lex.trim(), tipo_token));
 
-                            linha = linha.replaceFirst(Pattern.quote(lex), ""); // Remove the matched lexeme and continue
+                            // Remove the matched lexeme and continue
+                            linha = linha.replaceFirst(Pattern.quote(lex), ""); 
 
                             // Verificar mais casos onde isso ocorre. Ex: BOL -> TRUE, FALSE.
-                            //linha.trim().startsWith("\"\"") || 
-                            if (linha.trim().startsWith("(") || 
-                                linha.trim().startsWith("\"") || 
-                                linha.trim().startsWith("'") || 
-                                linha.trim().startsWith("{") || 
-                                linha.trim().startsWith(")")) {
+                            // Como as prioridades B (tokens variáveis) acontecem depois de A
+                            // Quando há dois caracteres fixos 
+                            if (linha.trim().startsWith("(") ||
+                                linha.trim().startsWith("++") ||
+                                linha.trim().startsWith("**") ||
+                                linha.trim().startsWith("--") ||
+                                linha.trim().startsWith("//") ||
+                                linha.trim().startsWith("%%") ||
+                                linha.trim().startsWith("!=") ||
+                                linha.trim().startsWith("==") ||
+                                linha.trim().startsWith(">>") ||
+                                linha.trim().startsWith("<<") ||
+                                linha.trim().startsWith(">=") ||
+                                linha.trim().startsWith("<=") ||
+                                linha.trim().startsWith("!!") ||
+                                linha.trim().startsWith("&&") ||
+                                linha.trim().startsWith("||") ||
+                                linha.trim().startsWith("{") ||
+                                linha.trim().startsWith(")") ||
+                                linha.trim().startsWith("}")) {
                                 continue;
                             }
                         }
                         // if prioridadeA matched but not a fixed token, fall through to prioridadeB
                     }
 
-                    // Evita adicionar tokens vazios ou apenas com espaços
+                    // Para armazenar tokens do tipo TEXTO
                     if (linha.trim().startsWith("'")) {
 
                             // Adicionar token antes & depois do texto
                             if (this.tabela_simbolos.putIfAbsent("'", new Token(id, "'", "ASPS")) == null) {
-                                this.tokens.add(new Token("'", "ASPS"));
-                                id++;
-                            }
-
-                            String aux[] = linha.split("'", 3);
-                            if (this.tabela_simbolos.putIfAbsent(aux[1], new Token(id, aux[1], "TEXTO")) == null) {
-                                this.tokens.add(new Token(aux[1], "TEXTO"));
                                 id++;
                             }
                             this.tokens.add(new Token("'", "ASPS"));
+
+                            String aux[] = linha.split("'", 3);
+                            if (this.tabela_simbolos.putIfAbsent(aux[1], new Token(id, aux[1], "TEXTO")) == null) {
+                                id++;
+                            }
+                            this.tokens.add(new Token(aux[1], "TEXTO"));
+                            this.tokens.add(new Token("'", "ASPS"));
+
+                            linha = aux[2];
+                            continue;
+                    }
+
+                    if (linha.trim().startsWith("\"")) {
+
+                            // Adicionar token antes & depois do texto
+                            if (this.tabela_simbolos.putIfAbsent("\"", new Token(id, "'", "ASPD")) == null) {
+                                id++;
+                            }
+                            this.tokens.add(new Token("\"", "ASPD"));
+
+                            String aux[] = linha.split("\"", 3);
+                            if (this.tabela_simbolos.putIfAbsent(aux[1], new Token(id, aux[1], "CPIX")) == null) {
+                                id++;
+                            }
+                            this.tokens.add(new Token(aux[1], "CPIX"));
+                            this.tokens.add(new Token("\"", "ASPD"));
 
                             linha = aux[2];
                             continue;
@@ -137,19 +188,19 @@ public final class Analisador {
                         //System.out.println("BBB ->  " + tipo_token_var);
                         if (tipo_token_var != null) {
                             lex = lex.trim(); // Não é do tipo texto
-                            if (this.tabela_simbolos.put(lex, new Token(id, lex, tipo_token_var)) == null) {
-                                this.tokens.add(new Token(lex, tipo_token_var));
+                            if (this.tabela_simbolos.putIfAbsent(lex, new Token(id, lex, tipo_token_var)) == null) {
                                 id++;
                             }
-                            
+                            this.tokens.add(new Token(lex, tipo_token_var));
+
                             linha = linha.replaceFirst(Pattern.quote(lex), "");
                             continue;
-                        
                         } else if (!lex.trim().isEmpty()) { // Evita adicionar tokens vazios ou apenas com espaços
-                            if (this.tabela_simbolos.put(lex, new Token(id, lex, "ID")) == null) {
-                                this.tokens.add(new Token(lex, "ID"));
+                            if (this.tabela_simbolos.putIfAbsent(lex, new Token(id, lex, "ID")) == null) {
                                 id++;
                             }
+                            this.tokens.add(new Token(lex, "ID"));
+
                             linha = linha.replaceFirst(Pattern.quote(lex), "");
                             continue;
                         } else {
@@ -191,7 +242,7 @@ public final class Analisador {
     }
 
     // Método para escrever o arquivo .pixobj
-    public void pixobj() {
+    public void tokens_pixobj() {
         try (FileWriter writer = new FileWriter("arquivo.pixobj")) {
             tokens.forEach(token -> {
                 try {

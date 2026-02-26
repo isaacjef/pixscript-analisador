@@ -24,7 +24,6 @@ public class Token {
                 linha = linha.substring(0, linha.lastIndexOf("]"));
 
                 String[] tipo = linha.split(": ");
-                //String[] lexemas = tipo[1].split(", ");
                 ArrayList<String> lexemas = new ArrayList<>();
                 for (String lex : tipo[1].split(", ")) {
                     lexemas.add(lex.trim());
@@ -35,7 +34,7 @@ public class Token {
 
             reader.close();
         } catch (IOException e) {
-            e.printStackTrace(); // Trata erros de leitura
+            e.printStackTrace();
         }
 
         return new HashMap<>(tabela_tokens);
