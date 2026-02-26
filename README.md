@@ -1,6 +1,5 @@
-# pixscript-compiler
+# pixscript-analisador
 
-projeto
 A partir da linguagem apresentada, deseja-se criar um analisador léxico para geração de
 código tokenizado e da tabela de símbolos. A seguir as características do programa:
 - O analisador léxico poderá ser escrito nas linguagens: Java; Python; Javascript; C
@@ -32,16 +31,16 @@ CLOSE
 
 # 📦 Estrutura do Programa
      .
-     ├── turing_machine
+     ├── pixscript-analisador
      │   └── edu
      │       └── src
      │           └── main
      |                └── java/ifgoiano
-     |                |   ├── Analisador_Lexico.java
-     |                |   ├── Leitor.java
+     |                |   ├── Analisador.java
+     |                |   ├── Token.java
      |                |   └── Main.java
      |                └── resources
-     ├── target         ├── token_table.txt
+     ├── target         └── token_table.txt
      ├── README.md
      ├── pom.xml
      └── teste.pix
@@ -56,14 +55,13 @@ CLOSE
 # 📜 Etapas do Programa
 
 1º - Criar a lista de tokens válidos.
-
-![Print da token_table.txt](image.png)
-
+<p align="center">
+ <img width="878" height="758" alt="image" src="https://github.com/user-attachments/assets/c8e14556-40e7-40ae-96a6-64a5728dd029" />
+</p>
 2º - Ler todos os símbolos da tabela definidora de tokens.
 <p align="center">
  <img width="990" height="717" alt="image" src="https://github.com/user-attachments/assets/131396d2-9feb-4a35-9019-463ec42f8855" />
 </p>
-
 3º - Analisar caracteres do código .pix
 
 Método ler_pix()
