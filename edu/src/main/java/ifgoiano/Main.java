@@ -7,21 +7,7 @@ public class Main {
         Analisador l = new Analisador();
         //l.validar_tokens();
         l.ler_pix();
+        l.tabela_simbolos_csv();
 
-        // String linha = "LEDGER transferencia";
-
-        // Pattern pattern = Pattern.compile("([a-zA-Z0-9$>'\\\"=<:|!&{}]+)"); // Exemplo de regex para tokens de variável
-        // Matcher matcher = pattern.matcher(linha);
-
-        // if (matcher.find()) {
-        //     System.out.println("Token encontrado: " + matcher.group(1)); // Debug: Verificar se o token VAR foi encontrado
-        //     String[] aux = linha.split(matcher.group());
-
-        //     for (String a : aux) {
-        //         System.out.println("Aux: " + a);
-        //     }
-        // } else {
-        //     System.out.println("Nenhum token encontrado");
-        // }
     }
 }
