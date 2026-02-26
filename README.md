@@ -47,6 +47,10 @@ CLOSE
      └── teste.pix
      .
 
+# Diagrama de Classes
+
+<img width="490" height="309" alt="image" src="https://github.com/user-attachments/assets/cfa5f7a0-1c96-4256-856b-8157b5027a30" />
+
 # 📦 Etapas do Programa
 
 1º [X] - Criar a lista de tokens válidos.
