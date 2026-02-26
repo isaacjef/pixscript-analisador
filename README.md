@@ -67,7 +67,11 @@ CLOSE
 Método ler_pix()
 
 4º - Criar arquivo .csv da tabela de símbolos.
+<p align="center">
+ <img width="1018" height="555" alt="image" src="https://github.com/user-attachments/assets/9f0fdf5f-c840-4569-94f7-3d9e174f92c4" />
+</p>
 
 5º - Criar arquivo .pixobj para todos os tokens.
-
-
+<p align="center">
+ <img width="919" height="635" alt="image" src="https://github.com/user-attachments/assets/16c42470-2b33-4d6f-a3ab-1478ed3db774" />
+</p>
