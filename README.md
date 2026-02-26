@@ -47,22 +47,29 @@ CLOSE
      └── teste.pix
      .
 
-# Diagrama de Classes
+# 🖥️ Diagrama de Classes
 
-<img width="490" height="309" alt="image" src="https://github.com/user-attachments/assets/cfa5f7a0-1c96-4256-856b-8157b5027a30" />
+<p align="center">
+ <img width="490" height="309" alt="image" src="https://github.com/user-attachments/assets/cfa5f7a0-1c96-4256-856b-8157b5027a30" />
+</p>
 
-# 📦 Etapas do Programa
+# 📜 Etapas do Programa
 
-1º [X] - Criar a lista de tokens válidos.
+1º - Criar a lista de tokens válidos.
 
 ![Print da token_table.txt](image.png)
 
-2º [] - Ler todos os símbolos da tabela definidora de tokens.
+2º - Ler todos os símbolos da tabela definidora de tokens.
+<p align="center">
+ <img width="990" height="717" alt="image" src="https://github.com/user-attachments/assets/131396d2-9feb-4a35-9019-463ec42f8855" />
+</p>
 
-<img width="990" height="717" alt="image" src="https://github.com/user-attachments/assets/131396d2-9feb-4a35-9019-463ec42f8855" />
+3º - Analisar caracteres do código .pix
+
+Método ler_pix()
+
+4º - Criar arquivo .csv da tabela de símbolos.
+
+5º - Criar arquivo .pixobj para todos os tokens.
 
 
-3º - Reunir todos lexemas, menos espaçamentos.
-4º - Tokenizar.
-5º - Criar a tabela de símbolos.
-6º - Substituir os lexemas por id.
