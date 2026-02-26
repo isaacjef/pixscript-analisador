@@ -57,15 +57,9 @@ CLOSE
 
 ![Print da token_table.txt](image.png)
 
-Token.java
-public HashMap<String, ArrayList<String>> validar_tokens()
+2º [] - Ler todos os símbolos da tabela definidora de tokens.
 
-Tabela de lista de tokens válidos. (Por enquanto) O token do tipo ID (IDENTIFIER), deve ficar na última posição,
-para que outros tipos não sejam detectados pelo mesmo, ocorrendo incongruencias entre os tipos.
-**(Criar tipo NUL: NULO, e TEX: '[...]')
-
-2º [] - Ler todos os símbolos do código de entrada.
-
+<img width="990" height="717" alt="image" src="https://github.com/user-attachments/assets/131396d2-9feb-4a35-9019-463ec42f8855" />
 
 
 3º - Reunir todos lexemas, menos espaçamentos.
