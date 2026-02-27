@@ -56,7 +56,7 @@ CLOSE
 
 1º - Criar a lista de tokens válidos.
 <p align="center">
- <img width="1033" height="699" alt="image" src="https://github.com/user-attachments/assets/d601c534-95c9-484e-b841-665849fda9cb" />
+ <img width="918" height="793" alt="image" src="https://github.com/user-attachments/assets/c959d09e-532a-4053-8bfb-8d86411dd1f1" />
 </p>
 2º - Ler todos os símbolos da tabela definidora de tokens.
 <p align="center">
