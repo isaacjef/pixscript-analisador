@@ -60,7 +60,7 @@ CLOSE
 </p>
 2º - Ler todos os símbolos da tabela definidora de tokens.
 <p align="center">
- <img width="990" height="717" alt="image" src="https://github.com/user-attachments/assets/131396d2-9feb-4a35-9019-463ec42f8855" />
+ <img width="1033" height="699" alt="image" src="https://github.com/user-attachments/assets/d601c534-95c9-484e-b841-665849fda9cb" />
 </p>
 3º - Analisar caracteres do código .pix
 
