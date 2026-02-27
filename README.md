@@ -1,6 +1,5 @@
-# pixscript-compiler
+# pixscript-analisador
 
-projeto
 A partir da linguagem apresentada, deseja-se criar um analisador léxico para geração de
 código tokenizado e da tabela de símbolos. A seguir as características do programa:
 - O analisador léxico poderá ser escrito nas linguagens: Java; Python; Javascript; C
@@ -32,43 +31,47 @@ CLOSE
 
 # 📦 Estrutura do Programa
      .
-     ├── turing_machine
+     ├── pixscript-analisador
      │   └── edu
      │       └── src
      │           └── main
      |                └── java/ifgoiano
-     |                |   ├── Analisador_Lexico.java
-     |                |   ├── Leitor.java
+     |                |   ├── Analisador.java
+     |                |   ├── Token.java
      |                |   └── Main.java
      |                └── resources
-     ├── target         ├── token_table.txt
+     ├── target         └── token_table.txt
      ├── README.md
      ├── pom.xml
      └── teste.pix
      .
 
-# Diagrama de Classes
+# 🖥️ Diagrama de Classes
 
-<img width="490" height="309" alt="image" src="https://github.com/user-attachments/assets/cfa5f7a0-1c96-4256-856b-8157b5027a30" />
+<p align="center">
+ <img width="490" height="309" alt="image" src="https://github.com/user-attachments/assets/cfa5f7a0-1c96-4256-856b-8157b5027a30" />
+</p>
 
-# 📦 Etapas do Programa
+# 📜 Etapas do Programa
 
-1º [X] - Criar a lista de tokens válidos.
+1º - Criar a lista de tokens válidos.
+<p align="center">
+ <img width="1033" height="699" alt="image" src="https://github.com/user-attachments/assets/d601c534-95c9-484e-b841-665849fda9cb" />
+</p>
+2º - Ler todos os símbolos da tabela definidora de tokens.
+<p align="center">
+ <img width="1033" height="699" alt="image" src="https://github.com/user-attachments/assets/d601c534-95c9-484e-b841-665849fda9cb" />
+</p>
+3º - Analisar caracteres do código .pix
 
-![Print da token_table.txt](image.png)
+Método ler_pix()
 
-Token.java
-public HashMap<String, ArrayList<String>> validar_tokens()
+4º - Criar arquivo .csv da tabela de símbolos.
+<p align="center">
+ <img width="1018" height="555" alt="image" src="https://github.com/user-attachments/assets/9f0fdf5f-c840-4569-94f7-3d9e174f92c4" />
+</p>
 
-Tabela de lista de tokens válidos. (Por enquanto) O token do tipo ID (IDENTIFIER), deve ficar na última posição,
-para que outros tipos não sejam detectados pelo mesmo, ocorrendo incongruencias entre os tipos.
-**(Criar tipo NUL: NULO, e TEX: '[...]')
-
-2º [] - Ler todos os símbolos do código de entrada.
-
-
-
-3º - Reunir todos lexemas, menos espaçamentos.
-4º - Tokenizar.
-5º - Criar a tabela de símbolos.
-6º - Substituir os lexemas por id.
+5º - Criar arquivo .pixobj para todos os tokens.
+<p align="center">
+ <img width="919" height="635" alt="image" src="https://github.com/user-attachments/assets/16c42470-2b33-4d6f-a3ab-1478ed3db774" />
+</p>
