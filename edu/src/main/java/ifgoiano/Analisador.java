@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public final class Analisador {
         t.validar_tokens();
     }
 
-     // Verifica se o token é válido & retorna o tipo (key) do token
+    // Verifica se o token é válido & retorna o tipo (key) do token
     private String verificarToken(Map<String, ArrayList<String>> tabela_tokens, String lexema) {
         for (Map.Entry<String, ArrayList<String>> e : tabela_tokens.entrySet()) {
             ArrayList<String> valores = e.getValue();
@@ -44,13 +45,13 @@ public final class Analisador {
         List<String> keys = Arrays.asList("VAR", "NUMI", "NUMD", "NUL", "BOL");
 
         // "Mapeia" cada elemento do ArrayList para a sua respectiva chave (key)
-        Map<String,String> sub_map = tabela_tokens.entrySet().stream()
-            .filter(entry -> keys.contains(entry.getKey()))
-            .flatMap(entry -> entry.getValue().stream()
-                .map(v -> new java.util.AbstractMap.SimpleEntry<>(v, entry.getKey())))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> sub_map = tabela_tokens.entrySet().stream()
+                .filter(entry -> keys.contains(entry.getKey()))
+                .flatMap(entry -> entry.getValue().stream()
+                        .map(v -> new java.util.AbstractMap.SimpleEntry<>(v, entry.getKey())))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        for (Map.Entry<String,String> e : sub_map.entrySet()) {
+        for (Map.Entry<String, String> e : sub_map.entrySet()) {
             String key = "(" + e.getKey() + ")";
             Pattern p = Pattern.compile(key);
             Matcher m = p.matcher(lexema.trim());
@@ -64,13 +65,13 @@ public final class Analisador {
     }
 
     /**
-     * Esta classe realiza a leitura de arquivos do tipo .pix, oriundos da linguagem de programação
-     * PixScript. É a principal classe do Analisador Léxico, e, de fato, é um analisador léxico
-     * propriamente dito.
+     * Esta classe realiza a leitura de arquivos do tipo .pix, oriundos da linguagem
+     * de programação PixScript. É a principal classe do Analisador Léxico, e, de fato, é um
+     * analisador léxico propriamente dito.
      * 
      * As palavras-chaves, tipos e nomes de variáveis, operadores, e etc são capturados via REGEX.
-     * Optamos por utilizar duas expressão regulares gerais, que distinguim os tokens encontrados
-     * em duas prioridades: 
+     * Optamos por utilizar duas expressões regulares, que distinguim os tokens encontrados em 
+     * duas prioridades:
      * A- Captura somente tokens fixos, que não tem os seus "nomes" modificados;
      * B- Captura tokens variáveis, os quais os nomes não são fixos, mas sim do tipo REGEX.
      * 
@@ -83,19 +84,18 @@ public final class Analisador {
 
             Map<String, ArrayList<String>> tabela_token = t.validar_tokens();
             Integer id = 0;
-        
-            Pattern prioridadeA = Pattern.compile("LEDGER|LET|IF|\\{|\\}|::|\\$>|<-|CLOSE|\\+\\+|\\-\\-|!=|==|\\*\\*|\\/\\/|%%|\\(|\\)|&&|\\|\\||!!|>>|<<|>=|<="); // Exemplo de regex para tokens de prioridade A
-            //Pattern prioridadeB = Pattern.compile("([\\w_$!#?@áãêõ.]+)");
-            Pattern prioridadeB = Pattern.compile("(\\w+\\.\\w+)|([\\S])+");
+
+            Pattern prioridadeA = Pattern.compile("LEDGER|LET|IF|\\{|\\}|::|\\$>|<-|CLOSE|\\+\\+|\\-\\-|!=|==|\\*\\*|\\/\\/|%%|\\(|\\)|&&|\\|\\||!!|>>|<<|>=|<="); 
+            Pattern prioridadeB = Pattern.compile("(\\d+\\.\\d+)|[(a-zA-Z_\\$!@#\\?~)\\wçãáàâäêéèëíìïîõôóòöúùûüª¢₢\\$]+");
 
             while ((linha = reader.readLine()) != null) {
-                // Análise quais palavras batem (match) com a exp. regular até que não reste mais caracteres.
+                // Analisa quais palavras batem (match) com a exp. regular até que não reste mais caracteres.
                 while (linha != null && !linha.isEmpty()) {
 
                     Matcher matcherA = prioridadeA.matcher(linha);
                     if (matcherA.find()) {
                         String lex = matcherA.group();
-                        String tipo_token = verificarToken(tabela_token, lex); 
+                        String tipo_token = verificarToken(tabela_token, lex);
 
                         if (tipo_token != null) {
                             // Evita sobrescrever tokens já existentes
@@ -105,29 +105,15 @@ public final class Analisador {
                             this.tokens.add(new Token(lex.trim(), tipo_token));
 
                             // Remove a parte encontrada (matched)
-                            linha = linha.replaceFirst(Pattern.quote(lex), ""); 
+                            linha = linha.replaceFirst(Pattern.quote(lex), "");
 
-                            // Verificar mais casos onde isso ocorre. Ex: BOL -> TRUE, FALSE.
-                            // Como as prioridades B (tokens variáveis) acontecem depois de A
-                            // Quando há dois caracteres fixos 
-                            if (linha.trim().startsWith("(") ||
-                                linha.trim().startsWith("++") ||
-                                linha.trim().startsWith("**") ||
-                                linha.trim().startsWith("--") ||
-                                linha.trim().startsWith("//") ||
-                                linha.trim().startsWith("%%") ||
-                                linha.trim().startsWith("!=") ||
-                                linha.trim().startsWith("==") ||
-                                linha.trim().startsWith(">>") ||
-                                linha.trim().startsWith("<<") ||
-                                linha.trim().startsWith(">=") ||
-                                linha.trim().startsWith("<=") ||
-                                linha.trim().startsWith("!!") ||
-                                linha.trim().startsWith("&&") ||
-                                linha.trim().startsWith("||") ||
-                                linha.trim().startsWith("{") ||
-                                linha.trim().startsWith(")") ||
-                                linha.trim().startsWith("}")) {
+                            String aux = linha.trim();
+                            if (aux.length() >= 3) {
+                                String token_operador = aux.substring(0, 2);
+                                if (prioridadeA.matcher(token_operador).find()) 
+                                continue;
+                            } else if (aux.length() == 1) {
+                                if (prioridadeA.matcher(aux).find()) 
                                 continue;
                             }
                         }
@@ -136,44 +122,54 @@ public final class Analisador {
                     // Para armazenar tokens do tipo TEXTO
                     if (linha.trim().startsWith("'")) {
 
-                            // Adicionar token antes & depois do texto
-                            if (this.tabela_simbolos.putIfAbsent("'", new Token(id, "'", "ASPS")) == null) {
-                                id++;
-                            }
-                            this.tokens.add(new Token("'", "ASPS"));
+                        // Adicionar token antes & depois do texto
+                        if (this.tabela_simbolos.putIfAbsent("'", new Token(id, "'", "ASPS")) == null) {
+                            id++;
+                        }
+                        this.tokens.add(new Token("'", "ASPS"));
 
-                            String aux[] = linha.split("'", 3);
-                            if (this.tabela_simbolos.putIfAbsent(aux[1], new Token(id, aux[1], "TEXTO")) == null) {
-                                id++;
-                            }
-                            this.tokens.add(new Token(aux[1], "TEXTO"));
-                            this.tokens.add(new Token("'", "ASPS"));
+                        String aux[] = linha.split("'", 3);
+                        if (this.tabela_simbolos.putIfAbsent(aux[1], new Token(id, aux[1], "TEXTO")) == null) {
+                            id++;
+                        }
+                        this.tokens.add(new Token(aux[1], "TEXTO"));
 
+                        if (aux.length >= 2) {
+                            this.tokens.add(new Token("'", "ASPS"));
                             linha = aux[2];
-                            continue;
+                        } else {
+                            linha = "";
+                        }
+
+                        continue;
                     }
 
                     if (linha.trim().startsWith("\"")) {
 
-                            // Adicionar token antes & depois do texto
-                            if (this.tabela_simbolos.putIfAbsent("\"", new Token(id, "'", "ASPD")) == null) {
-                                id++;
-                            }
-                            this.tokens.add(new Token("\"", "ASPD"));
+                        // Adicionar token antes & depois do texto
+                        if (this.tabela_simbolos.putIfAbsent("\"", new Token(id, "'", "ASPD")) == null) {
+                            id++;
+                        }
+                        this.tokens.add(new Token("\"", "ASPD"));
 
-                            String aux[] = linha.split("\"", 3);
-                            if (this.tabela_simbolos.putIfAbsent(aux[1], new Token(id, aux[1], "CPIX")) == null) {
-                                id++;
-                            }
-                            this.tokens.add(new Token(aux[1], "CPIX"));
-                            this.tokens.add(new Token("\"", "ASPD"));
+                        String aux[] = linha.split("\"", 3);
+                        if (this.tabela_simbolos.putIfAbsent(aux[1], new Token(id, aux[1], "CPIX")) == null) {
+                            id++;
+                        }
+                        this.tokens.add(new Token(aux[1], "CPIX"));
 
+                        if (aux.length >= 2) {
+                            this.tokens.add(new Token("\"", "ASPD"));
                             linha = aux[2];
-                            continue;
+                        } else {
+                            linha = "";
+                        }
+                        continue;
                     }
 
-
+                    linha = linha.trim();
                     Matcher matcherB = prioridadeB.matcher(linha);
+
                     if (matcherB.find()) {
                         String lex = matcherB.group();
                         // Verifica se o token é válido
@@ -187,24 +183,17 @@ public final class Analisador {
                             this.tokens.add(new Token(lex, tipo_token_var));
 
                             linha = linha.replaceFirst(Pattern.quote(lex), "");
-                            continue;
-                        } else if (!lex.trim().isEmpty()) { // Evita adicionar tokens vazios ou apenas com espaços
+                        } else if (!lex.trim().isEmpty()) {
                             if (this.tabela_simbolos.putIfAbsent(lex, new Token(id, lex, "ID")) == null) {
                                 id++;
                             }
                             this.tokens.add(new Token(lex, "ID"));
 
                             linha = linha.replaceFirst(Pattern.quote(lex), "");
-                            continue;
-                        } else {
-                            // Remove os espaços em branco, para evitar loops
-                            linha = linha.replaceFirst(Pattern.quote(lex), "");
-                            continue;
                         }
+                    } else if (!linha.equals("")) {
+                        throw new InputMismatchException("Invalid token: " + linha);   
                     }
-
-                    // Linha = ""
-                    break;
                 }
             }
 

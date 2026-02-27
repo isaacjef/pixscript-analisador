@@ -16,7 +16,9 @@ public class Token {
     public HashMap<String, ArrayList<String>> validar_tokens() {
         this.tabela_tokens = new HashMap<>();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(System.getProperty("user.dir") + "/edu/src/main/resources/token_table.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(System.getProperty("user.dir") 
+            + "/edu/src/main/resources/token_table.txt"))) {
+
             String linha;
             while ((linha = reader.readLine()) != null) {
                 // Removendo colchetes desnecessários e dividindo a linha em tipo e lexemas
