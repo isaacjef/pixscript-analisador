@@ -203,7 +203,7 @@ public final class Analisador {
         }
     }
 
-    // Método para escrever a tabela de símbolos em um arquivo, se necessário
+    // Método para escrever a tabela de símbolos em um arquivo
     public void tabela_simbolos_csv() {
         try (FileWriter writer = new FileWriter("arquivo.csv")) {
             writer.write("id,lexema,token\n");
